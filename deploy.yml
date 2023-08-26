@@ -1,0 +1,48 @@
+name: Deploy to Production
+
+on:
+  push:
+    branches:
+      - production
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v2
+      with:
+        node-version: '14' # or any other version you prefer
+
+    - name: Install dependencies and build
+      run: |
+        npm install
+        npm run build
+
+    - name: Add SSH keys to known hosts
+      run: |
+        mkdir -p ~/.ssh
+        chmod 700 ~/.ssh
+        echo "45.79.43.152 ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQDAe/bL1eRHaImZjw98QhEUtzzKBNvBklDLaCua1xkRWGpjcadW1INyqjHzEbLOQv6Jd7+MTVZMveOfQDT5LBlR5OiqtYwa5WIbDqPqwXHHeSa4PQjJ5lUjeMYSkX8Vt2LJxPxGyF7uJIo8ugmVsO9kTK4ydrSOQ32esvw40jjefW16pYDaVGBA1FYuStaiohReiGh7BLKjfGotk3ZxwEAU1kCkxheUORrnwgyKG3vlZbCyTxUhUh0XiViQ+F6lcImKXc5U6d2jMQ9Yh/k3ndFSkP5fR21pdGu719smwsu2enRUSKJNDz3cJi8JfiVKxfrWeUfro2MZov7Iotb5ak7S006tZe4WqnsfRXi7YERllic+e3sBWSHyxYXybJGdIc38sLLZ6Czc5s8G+l6IAdYTKa7UZ07rHbQj/ewNHHzCdx6JZt2x+111HN2wqixI4O05oBtIVsU2Gv54nLC2imT2S5yrrJ/Wi2SqitnI2aVmJudx4Tj3EEXJm0zqOuz5H+k=" >> ~/.ssh/known_hosts
+
+    - name: Start SSH agent
+      run: |
+        ssh-agent -a /tmp/ssh_agent.sock
+
+    - name: Add SSH key to agent
+      run: |
+        touch /home/runner/.ssh/id_rsa
+        echo "${{ secrets.KEY_SERVER_1 }}" > /home/runner/.ssh/id_rsa
+        chmod 600 /home/runner/.ssh/id_rsa
+        ssh-add /home/runner/.ssh/id_rsa
+
+      env:
+        SSH_AUTH_SOCK: /tmp/ssh_agent.sock
+
+    - name: Copy build directory to server
+      run: |
+        scp -r build/ adrian@45.79.43.152:/home/adrian/simple-build
