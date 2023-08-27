@@ -1,7 +1,6 @@
 {
   "name": "simple-reeact-node2",
   "version": "0.1.0",
-  "homepage": "http://node2.infoshared.org/simple-react-build",
   "private": true,
   "dependencies": {
     "@testing-library/jest-dom": "^5.17.0",
