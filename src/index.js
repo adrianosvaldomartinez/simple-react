@@ -16,10 +16,12 @@ const router = createBrowserRouter([
     element: <Root />,
     errorElement: <ErrorPage />,
   },
-]);
+],{
+  basename: "/simple-react-build",
+});
 root.render(
   <React.StrictMode>
-    <RouterProvider router={router} />
+    <RouterProvider  router={router} />
   </React.StrictMode>
 );
 
